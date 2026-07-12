@@ -1,6 +1,16 @@
 const User = require('../model/user');
-const bcrypt = require("bcrypt");
+const path = require('path');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const showHomePage = (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/views/home.html"));
+}
+const showRegisterPage = (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/views/register.html"));
+}
+const showLoginPage = (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/views/login.html"));
+}
 const registerUser = async (req, res) => {
     try {
         const existinguser = await User.findOne({ email: req.body.email });
@@ -40,7 +50,7 @@ const loginUser = async (req, res) => {
                     httpOnly: true,
                     maxAge: 10 * 60 * 1000
                 })
-                
+
                 res.redirect("/user/home");
             } else {
                 res.end("invalid password plz try again..");
@@ -54,5 +64,9 @@ const loginUser = async (req, res) => {
 }
 
 module.exports = {
-    registerUser, loginUser
+    showHomePage,
+    showRegisterPage,
+    showLoginPage,
+    registerUser,
+    loginUser
 };
