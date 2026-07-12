@@ -1,5 +1,6 @@
 const User = require('../model/user');
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 const registerUser = async (req, res) => {
     try {
         const existinguser = await User.findOne({ email: req.body.email });
@@ -25,7 +26,22 @@ const loginUser = async (req, res) => {
         if (user) {
             const isMatch = await bcrypt.compare(req.body.password, user.password)
             if (isMatch) {
-                res.redirect("/home.html");
+                const token = jwt.sign(
+                    {
+                        id: user._id,
+                        email: user.email
+                    },
+                    "mysecretkey",
+                    {
+                        expiresIn: "10min"
+                    }
+                )
+                res.cookie("token", token, {
+                    httpOnly: true,
+                    maxAge: 10 * 60 * 1000
+                })
+                
+                res.redirect("/user/home");
             } else {
                 res.end("invalid password plz try again..");
             }
