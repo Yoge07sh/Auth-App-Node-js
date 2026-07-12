@@ -6,6 +6,7 @@ const path = require('path');
 route.get('/home', authMiddleware, userController.showHomePage);
 route.get('/register', userController.showRegisterPage);
 route.get('/login', userController.showLoginPage);
+route.get('/logout',userController.logout);
 
 route.post('/register', userController.registerUser);
 route.post('/login', userController.loginUser);

@@ -41,7 +41,7 @@ const loginUser = async (req, res) => {
                         id: user._id,
                         email: user.email
                     },
-                    "mysecretkey",
+                    "mysecretKey",
                     {
                         expiresIn: "10min"
                     }
@@ -62,11 +62,16 @@ const loginUser = async (req, res) => {
         console.log(err);
     }
 }
+const logout = (req, res) => {
+    res.clearCookie("token");
+    res.redirect('/user/login');
+}
 
 module.exports = {
     showHomePage,
     showRegisterPage,
     showLoginPage,
     registerUser,
-    loginUser
+    loginUser,
+    logout
 };
