@@ -25,7 +25,7 @@ const registerUser = async (req, res) => {
         const user = new User(userData);
         await user.save();
         console.log("data saved successfully");
-        res.redirect('/home.html')
+        res.redirect("/user/home");
     } catch (err) {
         console.log(err)
     }
