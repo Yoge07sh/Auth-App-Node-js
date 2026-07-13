@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
@@ -20,9 +22,8 @@ app.use(cookieParser());
 
 // Routes
 app.use("/user", userRoutes);
-
 // Server
-app.listen(3000, (err) => {
+app.listen(process.env.PORT, (err) => {
     if (err) {
         console.log(err);
     } else {
