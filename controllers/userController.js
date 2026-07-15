@@ -27,6 +27,7 @@ const registerUser = async (req, res) => {
             errors: errors.array()
         });
     }
+    next();
     const email = req.body.email.toLowerCase();
     req.body.email = email;
 
@@ -44,7 +45,7 @@ const registerUser = async (req, res) => {
         await user.save();
 
         const token = jwt.sign(
-            { id: user._id, email: user.email },
+            { id: user._id, email: user.email, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: "1d" }
         );
@@ -68,7 +69,8 @@ const loginUser = async (req, res) => {
                 const token = jwt.sign(
                     {
                         id: user._id,
-                        email: user.email
+                        email: user.email,
+                        role: user.role
                     },
                     process.env.JWT_SECRET,
                     {
