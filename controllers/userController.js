@@ -27,7 +27,6 @@ const registerUser = async (req, res) => {
             errors: errors.array()
         });
     }
-    next();
     const email = req.body.email.toLowerCase();
     req.body.email = email;
 
