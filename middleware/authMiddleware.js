@@ -1,19 +1,29 @@
-const jwt = require('jsonwebtoken');
-const authMiddleware = (req, res, next) => {
+const jwt = require("jsonwebtoken");
+const User = require('../model/user');
+
+const authMiddleware = async (req, res, next) => {
     const token = req.cookies.token;
-    console.log(token);
+
     if (!token) {
-       return res.redirect('/user/login');
+        return res.redirect("/user/login");
     }
+
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log(decoded);
-        req.user = decoded;
+
+        const user = await User.findById(decoded.id);
+
+        if (!user) {
+            return res.redirect("/user/login");
+        }
+
+        req.user = user;
+
         next();
     } catch (err) {
         console.log(err);
-        return res.redirect('/user/login');
+        return res.redirect("/user/login");
     }
-
 };
+
 module.exports = authMiddleware;

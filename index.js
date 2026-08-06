@@ -1,32 +1,36 @@
 require("dotenv").config();
+
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
-
-// Database
 const connectDB = require("./config/db");
 
-// Routes
 const userRoute = require("./routes/userRoute");
-const adminRoute = require('./routes/adminRoute');
+const adminRoute = require("./routes/adminRoute");
+
 const app = express();
 
-// Database Connection
+// Database
 connectDB();
-app.use(express.json());
+
+// View Engine
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "frontend/views"));
+
 // Middleware
 app.use(express.static(path.join(__dirname, "frontend/public")));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(cookieParser());
 
+
+
 // Routes
+app.use(userRoute);
 app.use("/user", userRoute);
-app.use('/admin', adminRoute);
+app.use("/admin", adminRoute);
+
 // Server
-app.listen(process.env.PORT, (err) => {
-    if (err) {
-        console.log(err);
-    } else {
-        console.log("Server is running...");
-    }
+app.listen(process.env.PORT, () => {
+    console.log(`Server running on port ${process.env.PORT}`);
 });

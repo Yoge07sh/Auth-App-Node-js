@@ -6,19 +6,24 @@ const { validationResult } = require('express-validator');
 
 
 const showHomePage = (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/views/home.html"));
-}
-
+    res.render("home", {
+        user: req.user
+    });
+};
 
 const showRegisterPage = (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/views/register.html"));
+    res.render('register')
 }
 
 
 const showLoginPage = (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/views/login.html"));
+    res.render('login')
 }
-
+const showProfile = (req, res) => {
+    res.render("profile", {
+        user: req.user
+    });
+};
 
 const registerUser = async (req, res) => {
     const errors = validationResult(req);
@@ -27,6 +32,7 @@ const registerUser = async (req, res) => {
             errors: errors.array()
         });
     }
+
     const email = req.body.email.toLowerCase();
     req.body.email = email;
 
@@ -96,16 +102,142 @@ const loginUser = async (req, res) => {
 
 const logout = (req, res) => {
     res.clearCookie("token");
-    res.redirect('/user/login');
+    res.render('login');
+}
+
+const showChangePasswordPage = (req, res) => {
+    res.render('changepassword');
 }
 
 
+const changePassword = async (req, res) => {
+
+
+
+    const {
+        currentPassword,
+        newPassword,
+        confirmPassword
+    } = req.body;
+
+    try {
+
+        const user = await User.findById(req.user._id);
+
+        const isMatch = await bcrypt.compare(
+            currentPassword,
+            user.password
+        );
+
+        if (!isMatch) {
+            return res.render("changePassword", {
+                user,
+                error: "Current password is incorrect."
+            });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.render("changePassword", {
+                user,
+                error: "New password and confirm password do not match."
+            });
+        }
+
+        const samePassword = await bcrypt.compare(
+            newPassword,
+            user.password
+        );
+
+        if (samePassword) {
+            return res.render("changePassword", {
+                user,
+                error: "New password cannot be the same as the current password."
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        user.password = hashedPassword;
+
+        await user.save();
+
+        return res.render("changePassword", {
+            user,
+            success: "Password changed successfully."
+        });
+
+    } catch (err) {
+        console.log(err);
+
+        return res.render("changePassword", {
+            user: req.user,
+            error: "Something went wrong."
+        });
+    }
+};
+
+const showEditProfilePage = (req, res) => {
+    res.render("editprofile", {
+        user: req.user
+    });
+};
+
+const updateProfile = async (req, res) => {
+    try {
+
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.redirect("/user/login");
+        }
+
+        const { firstname, lastname, email } = req.body;
+
+        const lowerEmail = email.toLowerCase();
+
+        const existingUser = await User.findOne({
+            email: lowerEmail,
+            _id: { $ne: user._id }
+        });
+
+        if (existingUser) {
+            return res.render("editProfile", {
+                user,
+                error: "Email is already in use."
+            });
+        }
+
+        user.firstname = firstname;
+        user.lastname = lastname;
+        user.email = lowerEmail;
+
+        await user.save();
+
+        return res.render("profile", {
+            user,
+            success: "Profile updated successfully."
+        });
+
+    } catch (err) {
+        console.log(err);
+
+        return res.render("editProfile", {
+            user: req.user,
+            error: "Something went wrong."
+        });
+    }
+};
 
 module.exports = {
     showHomePage,
     showRegisterPage,
     showLoginPage,
+    showProfile,
     registerUser,
     loginUser,
-    logout
+    logout,
+    showChangePasswordPage,
+    changePassword,
+    showEditProfilePage,
+    updateProfile
 };
